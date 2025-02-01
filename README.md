@@ -26,8 +26,9 @@ cat > index.html << 'EOF'
 <body>
   <p id="userDisplay">Checking user...</p>
   <button id="forgetUser">Forget User</button>
+  <button id="rememberUser">Remember User</button>
 </body>
-</html>>
+</html>
 EOF
 ```
 
@@ -39,8 +40,24 @@ cat > index.js << 'EOF'
 document.addEventListener("DOMContentLoaded", () => {
   const userKey = "randomUser";
 
+  const adjectives = [
+    "Quick", "Lazy", "Happy", "Sad", "Bright", "Dark", "Mighty", "Brave"
+  ];
+
+  const nouns = [
+    "Lion", "Tiger", "Bear", "Eagle", "Shark", "Wolf", "Panther", "Dragon"
+  ];
+
+  function getRandomElement(array) {
+    const randomIndex = Math.floor(Math.random() * array.length);
+    return array[randomIndex];
+  }
+
   function generateRandomUser() {
-    return "user-" + nanoid(10); // Generates a username prefixed with "user-" and 10 random characters
+    const adjective = getRandomElement(adjectives);
+    const noun = getRandomElement(nouns);
+    const number = Math.floor(Math.random() * 1000);
+    return `${adjective}${noun}${number}`;
   }
 
   function checkAndSetUser() {
@@ -54,15 +71,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function displayUser(user) {
     let userDisplay = document.getElementById("userDisplay");
+    if (!userDisplay) {
+      userDisplay = document.createElement("p");
+      userDisplay.id = "userDisplay";
+      document.body.appendChild(userDisplay);
+    }
     userDisplay.textContent = `User: ${user}`;
   }
 
   function forgetUser() {
     localStorage.removeItem(userKey);
-    document.getElementById("userDisplay").textContent = "User forgotten.";
+    let userDisplay = document.getElementById("userDisplay");
+    if (userDisplay) {
+      userDisplay.textContent = "User forgotten.";
+    }
   }
 
   document.getElementById("forgetUser").addEventListener("click", forgetUser);
+  document.getElementById("rememberUser").addEventListener("click", checkAndSetUser);
 
   checkAndSetUser();
 });
