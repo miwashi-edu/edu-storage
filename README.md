@@ -19,7 +19,7 @@ cat > index.html << 'EOF'
 <!DOCTYPE html>
 <html>
 <head>
-  <script src="https://cdn.jsdelivr.net/npm/random-username-generator@1.0.4/index.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/nanoid@4.0.0/nanoid.min.js"></script>
   <script src="index.js" defer></script>
   <link rel="stylesheet" href="index.css" />
 </head>
@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const userKey = "randomUser";
 
   function generateRandomUser() {
-    return RandomUsernameGenerator.generate();
+    return "user-" + nanoid(10); // Generates a username prefixed with "user-" and 10 random characters
   }
 
   function checkAndSetUser() {
@@ -54,26 +54,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function displayUser(user) {
     let userDisplay = document.getElementById("userDisplay");
-    if (!userDisplay) {
-      userDisplay = document.createElement("p");
-      userDisplay.id = "userDisplay";
-      document.body.appendChild(userDisplay);
-    }
     userDisplay.textContent = `User: ${user}`;
   }
 
   function forgetUser() {
     localStorage.removeItem(userKey);
-    let userDisplay = document.getElementById("userDisplay");
-    if (userDisplay) {
-      userDisplay.textContent = "User forgotten.";
-    }
+    document.getElementById("userDisplay").textContent = "User forgotten.";
   }
 
-  const forgetButton = document.createElement("button");
-  forgetButton.textContent = "Forget User";
-  forgetButton.addEventListener("click", forgetUser);
-  document.body.appendChild(forgetButton);
+  document.getElementById("forgetUser").addEventListener("click", forgetUser);
 
   checkAndSetUser();
 });
