@@ -19,14 +19,20 @@ cat > index.html << 'EOF'
 <!DOCTYPE html>
 <html>
 <head>
-  <script src="https://cdn.jsdelivr.net/npm/nanoid@4.0.0/nanoid.min.js"></script>
   <script src="index.js" defer></script>
   <link rel="stylesheet" href="index.css" />
 </head>
 <body>
   <p id="userDisplay">Checking user...</p>
   <button id="forgetUser">Forget User</button>
-  <button id="rememberUser">Remember User</button>
+  
+  <h2>Register</h2>
+  <input type="text" id="username" placeholder="Enter username" />
+  <input type="password" id="password" placeholder="Enter password" />
+  <button id="registerUser">Register</button>
+  
+  <h2>Registered Users</h2>
+  <ul id="userList"></ul>
 </body>
 </html>
 EOF
@@ -39,6 +45,7 @@ EOF
 cat > index.js << 'EOF'
 document.addEventListener("DOMContentLoaded", () => {
   const userKey = "randomUser";
+  const usersKey = "registeredUsers";
 
   const adjectives = [
     "Quick", "Lazy", "Happy", "Sad", "Bright", "Dark", "Mighty", "Brave"
@@ -49,15 +56,11 @@ document.addEventListener("DOMContentLoaded", () => {
   ];
 
   function getRandomElement(array) {
-    const randomIndex = Math.floor(Math.random() * array.length);
-    return array[randomIndex];
+    return array[Math.floor(Math.random() * array.length)];
   }
 
   function generateRandomUser() {
-    const adjective = getRandomElement(adjectives);
-    const noun = getRandomElement(nouns);
-    const number = Math.floor(Math.random() * 1000);
-    return `${adjective}${noun}${number}`;
+    return `${getRandomElement(adjectives)}${getRandomElement(nouns)}${Math.floor(Math.random() * 1000)}`;
   }
 
   function checkAndSetUser() {
@@ -71,26 +74,42 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function displayUser(user) {
     let userDisplay = document.getElementById("userDisplay");
-    if (!userDisplay) {
-      userDisplay = document.createElement("p");
-      userDisplay.id = "userDisplay";
-      document.body.appendChild(userDisplay);
-    }
     userDisplay.textContent = `User: ${user}`;
   }
 
   function forgetUser() {
     localStorage.removeItem(userKey);
-    let userDisplay = document.getElementById("userDisplay");
-    if (userDisplay) {
-      userDisplay.textContent = "User forgotten.";
+    document.getElementById("userDisplay").textContent = "User forgotten.";
+  }
+
+  function registerUser() {
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    if (username && password) {
+      const users = JSON.parse(localStorage.getItem(usersKey)) || [];
+      users.push({ username, password });
+      localStorage.setItem(usersKey, JSON.stringify(users));
+      displayUsers();
     }
   }
 
+  function displayUsers() {
+    const userList = document.getElementById("userList");
+    userList.innerHTML = "";
+    const users = JSON.parse(localStorage.getItem(usersKey)) || [];
+    users.forEach(user => {
+      const li = document.createElement("li");
+      li.textContent = `Username: ${user.username}`;
+      userList.appendChild(li);
+    });
+  }
+
   document.getElementById("forgetUser").addEventListener("click", forgetUser);
-  document.getElementById("rememberUser").addEventListener("click", checkAndSetUser);
+  document.getElementById("registerUser").addEventListener("click", registerUser);
 
   checkAndSetUser();
+  displayUsers();
 });
 EOF
 ```
