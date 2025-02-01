@@ -16,29 +16,28 @@ touch index.js
 
 ```bash
 cat > index.html << 'EOF'
-<!DOCTYPE html>
 <html>
 <head>
   <script src="index.js" defer></script>
   <link rel="stylesheet" href="index.css" />
 </head>
 <body>
-  <p id="userDisplay">Checking user...</p>
-  <button id="forgetUser">Forget User</button>
-  
-  <h2>Register</h2>
-  <input type="text" id="username" placeholder="Enter username" />
-  <input type="password" id="password" placeholder="Enter password" />
-  <button id="registerUser">Register</button>
-  
-  <h2>Login</h2>
-  <input type="text" id="loginUsername" placeholder="Enter username" />
-  <input type="password" id="loginPassword" placeholder="Enter password" />
-  <button id="loginUser">Login</button>
-  <p id="loginStatus"></p>
-  
-  <h2>Registered Users</h2>
-  <ul id="userList"></ul>
+<p id="userDisplay">Not logged in</p>
+<button id="logoutUser">Logout</button>
+
+<h2>Register</h2>
+<input type="text" id="username" placeholder="Enter username" />
+<input type="password" id="password" placeholder="Enter password" />
+<button id="registerUser">Register</button>
+
+<h2>Login</h2>
+<input type="text" id="loginUsername" placeholder="Enter username" />
+<input type="password" id="loginPassword" placeholder="Enter password" />
+<button id="loginUser">Login</button>
+<p id="loginStatus"></p>
+
+<h2>Registered Users</h2>
+<ul id="userList"></ul>
 </body>
 </html>
 EOF
@@ -50,43 +49,13 @@ EOF
 ```bash
 cat > index.js << 'EOF'
 document.addEventListener("DOMContentLoaded", () => {
-  const userKey = "randomUser";
   const usersKey = "registeredUsers";
   const sessionUserKey = "loggedInUser";
 
-  const adjectives = [
-    "Quick", "Lazy", "Happy", "Sad", "Bright", "Dark", "Mighty", "Brave"
-  ];
-
-  const nouns = [
-    "Lion", "Tiger", "Bear", "Eagle", "Shark", "Wolf", "Panther", "Dragon"
-  ];
-
-  function getRandomElement(array) {
-    return array[Math.floor(Math.random() * array.length)];
-  }
-
-  function generateRandomUser() {
-    return `${getRandomElement(adjectives)}${getRandomElement(nouns)}${Math.floor(Math.random() * 1000)}`;
-  }
-
-  function checkAndSetUser() {
-    let user = localStorage.getItem(userKey);
-    if (!user) {
-      user = generateRandomUser();
-      localStorage.setItem(userKey, user);
-    }
-    displayUser(user);
-  }
-
-  function displayUser(user) {
+  function displayUser() {
     let userDisplay = document.getElementById("userDisplay");
-    userDisplay.textContent = `User: ${user}`;
-  }
-
-  function forgetUser() {
-    localStorage.removeItem(userKey);
-    document.getElementById("userDisplay").textContent = "User forgotten.";
+    const sessionUser = sessionStorage.getItem(sessionUserKey);
+    userDisplay.textContent = sessionUser ? `Logged in as: ${sessionUser}` : "Not logged in";
   }
 
   function registerUser() {
@@ -123,16 +92,22 @@ document.addEventListener("DOMContentLoaded", () => {
     if (user) {
       sessionStorage.setItem(sessionUserKey, username);
       loginStatus.textContent = "Login successful!";
+      displayUser();
     } else {
       loginStatus.textContent = "Invalid username or password.";
     }
   }
 
-  document.getElementById("forgetUser").addEventListener("click", forgetUser);
+  function logoutUser() {
+    sessionStorage.removeItem(sessionUserKey);
+    displayUser();
+  }
+
   document.getElementById("registerUser").addEventListener("click", registerUser);
   document.getElementById("loginUser").addEventListener("click", loginUser);
+  document.getElementById("logoutUser").addEventListener("click", logoutUser);
 
-  checkAndSetUser();
+  displayUser();
   displayUsers();
 });
 EOF
@@ -142,6 +117,72 @@ EOF
 
 ```bash
 cat > index.css << 'EOF'
+body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+  padding: 20px;
+  background-color: #f4f4f4;
+}
+
+h2 {
+  color: #333;
+}
+
+p {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+input {
+  display: block;
+  margin: 10px 0;
+  padding: 8px;
+  width: 100%;
+  max-width: 300px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+button {
+  background-color: #28a745;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+button:hover {
+  background-color: #218838;
+}
+
+#userDisplay {
+  padding: 10px;
+  background-color: #fff;
+  border-radius: 4px;
+  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+#loginStatus {
+  color: red;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+ul li {
+  background-color: white;
+  padding: 8px;
+  margin: 5px 0;
+  border-radius: 4px;
+  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+}
 
 EOF
 ```
